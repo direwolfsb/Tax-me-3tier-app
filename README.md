@@ -4,6 +4,8 @@
 
 # Three-Tier Application on Kubernetes with AWS ALB
 
+### [Live Demo Video](https://drive.google.com/file/d/1x2bRU9SOpP2g2jP5doyzYhzHJuIla0Fj/view?usp=sharing)
+
 ### Home Page
 <img src="https://github.com/user-attachments/assets/fe5013e9-9bad-4f42-818b-f11e8c255a82" alt="Home" width="500px">
 
@@ -314,9 +316,7 @@ This project is licensed under the MIT License.
 <img src="https://github.com/user-attachments/assets/8eb6f6d3-6e50-44e8-81f0-ea8ad028f8b2" alt="Load Balancer" width="500px">
 
 ### AWS EKS Cluster
-<img src="https://github.com/user-attachments/assets/3db00ad4
-
--7a96-412e-92df-e316cfa165b5" alt="EKS" width="500px">
+<img src="https://github.com/user-attachments/assets/3db00ad4-7a96-412e-92df-e316cfa165b5" alt="EKS" width="500px">
 
 ### AWS ECR Repository
 <img src="https://github.com/user-attachments/assets/e988b933-d0d9-4583-8bc4-52645863cea0" alt="ECR" width="500px">
