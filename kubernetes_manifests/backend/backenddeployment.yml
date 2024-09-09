@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: three-tier
+  labels:
+    app: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+      - name: api
+        image: <your-docker-repo>/three-tier-backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3500
+        env:
+        - name: MONGO_URI
+          value: "mongodb+srv://suyogbam:FakePassword123%40@cluster0.vo1q9ga.mongodb.net/Tax-Me%2C-I%27m-Single?retryWrites=true&w=majority"
+        - name: PORT
+          value: "3500"
