@@ -1,5 +1,3 @@
-
-
 ---
 
 # Three-Tier Application on Kubernetes with AWS ALB
@@ -24,6 +22,7 @@ This repository contains a full-stack three-tier application deployed using Kube
 - [Backend API](#backend-api)
 - [Environment Variables](#environment-variables)
 - [Deployment](#deployment)
+- [Domain Configuration with GoDaddy](#domain-configuration-with-godaddy)
 - [Accessing the Application](#accessing-the-application)
 - [Contributing](#contributing)
 - [License](#license)
@@ -50,6 +49,8 @@ This repository contains a full-stack three-tier application deployed using Kube
 - **Orchestration:** Kubernetes
 - **Cloud Provider:** AWS EKS
 - **Load Balancer:** AWS Application Load Balancer (ALB)
+- **Image Repository:** Amazon Elastic Container Registry (ECR)
+- **Domain Provider:** GoDaddy
 
 ## Prerequisites
 
@@ -107,6 +108,39 @@ The frontend is built using React and communicates with the backend API.
    npm start
    ```
 
+## Pushing Images to Amazon ECR
+
+Before deploying the application to Kubernetes, you need to push the Docker images to Amazon ECR.
+
+1. **Authenticate Docker to your Amazon ECR registry:**
+   ```bash
+   aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <account-id>.dkr.ecr.<region>.amazonaws.com
+   ```
+
+2. **Build and tag the Docker images:**
+   - Backend:
+     ```bash
+     docker build -t three-tier-backend ./server
+     docker tag three-tier-backend:latest <account-id>.dkr.ecr.<region>.amazonaws.com/three-tier-backend:latest
+     ```
+
+   - Frontend:
+     ```bash
+     docker build -t three-tier-frontend ./client
+     docker tag three-tier-frontend:latest <account-id>.dkr.ecr.<region>.amazonaws.com/three-tier-frontend:latest
+     ```
+
+3. **Push the images to Amazon ECR:**
+   - Backend:
+     ```bash
+     docker push <account-id>.dkr.ecr.<region>.amazonaws.com/three-tier-backend:latest
+     ```
+
+   - Frontend:
+     ```bash
+     docker push <account-id>.dkr.ecr.<region>.amazonaws.com/three-tier-frontend:latest
+     ```
+
 ## Kubernetes Manifests
 
 ### Frontend (React)
@@ -151,7 +185,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: public.ecr.aws/s7u2f5t6/three-tier-frontend:latest
+        image: <account-id>.dkr.ecr.<region>.amazonaws.com/three-tier-frontend:latest
         ports:
         - containerPort: 3000
         env:
@@ -200,7 +234,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: public.ecr.aws/s7u2f5t6/three-tier-backend:latest
+        image: <account-id>.dkr.ecr.<region>.amazonaws.com/three-tier-backend:latest
         ports:
         - containerPort: 3500
         env:
@@ -271,12 +305,37 @@ POST /api/taxes
 
 ### Backend (`.env`)
 ```bash
-MONGO_URI=mongodb+srv://<username>:<madeup-password>@cluster0.mongodb.net/taxDB?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://<username>:<madeup-password>@cluster0.mongodb.net/taxDB?retryWrites
+
+=true&w=majority
 PORT=3500
 ```
 
 ### Frontend
 In the Kubernetes manifest for the frontend, the `REACT_APP_BACKEND_URL` points to the backend API via the ALB domain.
+
+## Domain Configuration with GoDaddy
+
+To make the application accessible via a custom domain, you need to configure your domain with GoDaddy. Here’s how to link your AWS resources to the GoDaddy-managed domain:
+
+1. **Obtain your domain from GoDaddy:**
+   Log in to your GoDaddy account and purchase a domain (e.g., `suyogapi.org`).
+
+2. **Update DNS records:**
+   In the GoDaddy dashboard, go to the domain settings, and add an A record that points to the AWS ALB. The ALB provides a DNS name, which you should use for the A record's value.
+
+   - **Host:** `@` (or leave it blank for the root domain)
+   - **Points to:** `<AWS-ALB-DNS-Name>`
+   - **TTL:** Set to default
+
+3. **Use CNAME for subdomains (if needed):**
+   If you want to add subdomains like `www.suyogapi.org`, create a CNAME record that points to your AWS ALB DNS name.
+
+   - **Host:** `www`
+   - **Points to:** `<AWS-ALB-DNS-Name>`
+
+4. **Wait for DNS propagation:**
+   It might take a few minutes to a couple of hours for the DNS changes to propagate globally. Once done, your domain will be connected to your AWS application.
 
 ## Deployment
 
@@ -299,7 +358,7 @@ In the Kubernetes manifest for the frontend, the `REACT_APP_BACKEND_URL` points 
 
 ## Accessing the Application
 
-Once the ALB is set up, you can access the application by navigating to `http://www.suyogapi.org` in your browser.
+Once the ALB is set up, and the GoDaddy domain is configured, you can access the application by navigating to `http://www.suyogapi.org` in your browser.
 
 - Frontend: `http://www.suyogapi.org`
 - Backend: `http://www.suyogapi.org/api/taxes`
@@ -325,4 +384,3 @@ This project is licensed under the MIT License.
 <img src="https://github.com/user-attachments/assets/1b4e5de6-ded3-4b13-b8e4-ff00365dca8f" alt="Cluster Instances" width="500px">
 
 ---
-
